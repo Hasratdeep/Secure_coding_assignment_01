@@ -21,9 +21,10 @@ def send_email(to, subject, body):
     print("Subject:", subject)
     print("Body:", body)
     print("Email sent successfully.")
+    send_email("xyz@example.com", "Welcome!", "Hello, this is a greetings email.")
 
 def get_data():
-    url = 'http://insecure-api.com/get-data'
+    url = 'https://insecure-api.com/get-data'
     if not url.startswith("https://"):
         print("Error: Failed to load Url.")
         return None
@@ -31,17 +32,19 @@ def get_data():
     return data
 
 def save_to_db(data):
-    query = f"INSERT INTO mytable (column1, column2) VALUES ('{data}', 'Another Value')"
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO mytable (column1, column2)
+            VALUES (%(data)s, %(value)s)
+        """, {
+            'data': data,
+            'value': "Another Value"
+        })
     try:
-        connection = pymysql.connect(**db_config)
-        cursor = connection.cursor()
-        cursor.execute(f"INSERT INTO mytable (column1, column2) VALUES ('{data}', 'Another Value')")
         connection.commit()
         print("Data Successfully saved.")
     except Exception as e:
         print("Error:", e)
-        cursor.close()
-        connection.close()
 
 if __name__ == '__main__':
     user_input = get_user_input()
